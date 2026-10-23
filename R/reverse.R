@@ -12,7 +12,8 @@
 #'   or `"both"`.
 #' @param min_abs_log2fc Keep hits with at least this absolute log2 fold change.
 #' @param sort_by `"padj"` or `"log2fc"`.
-#' @param limit Maximum hits to return (1-500).
+#' @param limit Maximum hits to return per page (1-500).
+#' @param offset Skip this many matches (paging).
 #' @param client An MCP client; defaults to [gpsadb_client()].
 #' @return A [gpsadb_result]; its data has `dataset`, `perturbed_gene`, `method`,
 #'   `cell_line`, `log2fc`, `padj`, `base_mean`, and `gpsadb_meta()` has `total`,
@@ -26,20 +27,23 @@ gpsadb_query_gene <- function(gene,
                               min_abs_log2fc = 0,
                               sort_by = c("padj", "log2fc"),
                               limit = 50,
+                              offset = 0,
                               client = gpsadb_client()) {
   check_scalar(gene, "gene")
-  res <- client$call_tool_data("query_gene", list(
+  res <- gpsadb_call(client, "query_gene", list(
     gene = gene,
     padj_lt = padj_lt,
     direction = match.arg(direction),
     min_abs_log2fc = min_abs_log2fc,
     sort_by = match.arg(sort_by),
-    limit = limit
+    limit = limit,
+    offset = offset
   ))
   new_gpsadb_result(
     records_to_tibble(res$hits),
-    pick_meta(res, c("gene", "padj_lt", "total", "n_up", "n_down", "returned"))
-  )
+    pick_meta(res, c("gene", "padj_lt", "total", "n_up", "n_down", "offset", "returned"))
+  ,
+    provenance = attr(res, "provenance"))
 }
 
 #' Perturbations that change a pathway
@@ -54,7 +58,8 @@ gpsadb_query_gene <- function(gene,
 #' @param direction `"up"` (activated by the perturbation), `"down"` or
 #'   `"both"`.
 #' @param sort_by `"padj"` or `"nes"`.
-#' @param limit Maximum hits to return (1-500).
+#' @param limit Maximum hits to return per page (1-500).
+#' @param offset Skip this many matches (paging).
 #' @param client An MCP client; defaults to [gpsadb_client()].
 #' @return A [gpsadb_result]; its data has `dataset`, `perturbed_gene`, `method`,
 #'   `cell_line`, `nes`, `padj`, and `gpsadb_meta()` has `total`, `n_up`, `n_down`.
@@ -67,21 +72,24 @@ gpsadb_query_gene_set <- function(term,
                                   direction = c("both", "up", "down"),
                                   sort_by = c("padj", "nes"),
                                   limit = 50,
+                                  offset = 0,
                                   client = gpsadb_client()) {
   check_scalar(term, "term")
-  res <- client$call_tool_data("query_gene_set", drop_nulls(list(
+  res <- gpsadb_call(client, "query_gene_set", drop_nulls(list(
     term = term,
     library = library,
     padj_lt = padj_lt,
     direction = match.arg(direction),
     sort_by = match.arg(sort_by),
-    limit = limit
+    limit = limit,
+    offset = offset
   )))
   new_gpsadb_result(
     records_to_tibble(res$hits),
     pick_meta(res, c("library", "term", "set_size", "padj_lt", "total", "n_up", "n_down",
-          "returned"))
-  )
+          "offset", "returned"))
+  ,
+    provenance = attr(res, "provenance"))
 }
 
 #' Search gene sets
@@ -111,7 +119,7 @@ gpsadb_search_gene_sets <- function(query = NULL,
                                     include_genes = FALSE,
                                     limit = 25,
                                     client = gpsadb_client()) {
-  res <- client$call_tool_data("search_gene_sets", drop_nulls(list(
+  res <- gpsadb_call(client, "search_gene_sets", drop_nulls(list(
     query = query,
     library = library,
     contains_gene = contains_gene,
@@ -122,5 +130,6 @@ gpsadb_search_gene_sets <- function(query = NULL,
   new_gpsadb_result(
     records_to_tibble(res$gene_sets),
     pick_meta(res, c("total", "returned"))
-  )
+  ,
+    provenance = attr(res, "provenance"))
 }

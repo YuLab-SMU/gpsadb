@@ -21,6 +21,8 @@
 #' gpsadb_meta(hits)       # the scalars as a list
 #' gpsadb_meta(hits, "total")
 #' gpsadb_report_url(hits) # the website report, when there is one
+#' gpsadb_genes(hits)      # the gene symbols, ready for the next service
+#' hits$gene               # a column, as on a data frame
 #' ```
 #'
 #' `$data` and `$meta` still work; the accessors exist so you do not have to
@@ -33,6 +35,11 @@
 #' @param x A `gpsadb_result`.
 #' @param field Name of one scalar in the result's metadata. When given, that
 #'   value is returned instead of the whole list.
+#' @param column Column to take the genes from. Defaults to `gene`, then
+#'   `perturbed_gene`; pass it explicitly for results whose genes live elsewhere
+#'   (a GSEA result keeps pathway names in `term`).
+#' @param unique Drop duplicates (default `TRUE`), which is what a downstream
+#'   service usually wants.
 #' @param i,j Row and column selectors, as for a data frame. Indexing returns a
 #'   plain tibble: the scalars describe the full query, so they are dropped
 #'   rather than silently kept and left stale.
@@ -47,8 +54,12 @@
 NULL
 
 #' @keywords internal
-new_gpsadb_result <- function(data, meta = list()) {
-  structure(list(data = data, meta = meta), class = "gpsadb_result")
+new_gpsadb_result <- function(data, meta = list(), provenance = NULL) {
+  structure(
+    list(data = data, meta = meta),
+    class = "gpsadb_result",
+    provenance = provenance
+  )
 }
 
 # Keep only the metadata fields the server actually returned: `x[c(...)]` would
@@ -99,6 +110,32 @@ gpsadb_meta <- function(x, field = NULL) {
 
 #' @rdname gpsadb_result
 #' @export
+gpsadb_genes <- function(x, column = NULL, unique = TRUE) {
+  check_gpsadb_result(x)
+  data <- gpsadb_data(x)
+  if (is.null(column)) {
+    column <- intersect(c("gene", "perturbed_gene"), names(data))
+    if (!length(column)) {
+      stop(
+        "this result has no `gene` or `perturbed_gene` column; pass `column =`. ",
+        "Available: ", paste(names(data), collapse = ", "),
+        call. = FALSE
+      )
+    }
+    column <- column[[1]]
+  }
+  if (!column %in% names(data)) {
+    stop("no column `", column, "`; available: ",
+         paste(names(data), collapse = ", "), call. = FALSE)
+  }
+  genes <- as.character(data[[column]])
+  genes <- genes[!is.na(genes) & nzchar(genes)]
+  if (isTRUE(unique)) genes <- unique(genes)
+  genes
+}
+
+#' @rdname gpsadb_result
+#' @export
 gpsadb_report_url <- function(x) {
   check_gpsadb_result(x)
   url <- x$meta[["url"]]
@@ -125,6 +162,15 @@ print.gpsadb_result <- function(x, ...) {
   } else {
     cat("  <no rows>\n")
   }
+  prov <- attr(x, "provenance")
+  if (!is.null(prov)) {
+    cat(sprintf(
+      "  GPSAdb %s (server %s) \u00b7 %s\n",
+      if (is.null(prov$release) || is.na(prov$release)) "?" else prov$release,
+      if (is.null(prov$server_version) || is.na(prov$server_version)) "?" else prov$server_version,
+      prov$queried_at %||% "?"
+    ))
+  }
   invisible(x)
 }
 
@@ -138,6 +184,14 @@ as.data.frame.gpsadb_result <- function(x, row.names = NULL, optional = FALSE, .
 #' @export
 as_tibble.gpsadb_result <- function(x, ...) {
   tibble::as_tibble(gpsadb_data(x), ...)
+}
+
+#' @rdname gpsadb_result
+#' @param name A field or column name.
+#' @export
+`$.gpsadb_result` <- function(x, name) {
+  if (name %in% c("data", "meta")) return(.subset2(x, name))
+  .subset2(x, "data")[[name]]
 }
 
 #' @rdname gpsadb_result

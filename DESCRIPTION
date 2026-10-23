@@ -1,6 +1,6 @@
 Package: gpsadb
 Title: R Client for the 'GPSAdb' Genetic Perturbation Database
-Version: 0.1.1
+Version: 0.1.4
 Authors@R: person("Yonghe", "Xia", , "xiayh17@gmail.com", role = c("aut", "cre"))
 Description: Query 'GPSAdb', a database of genetic perturbation RNA-seq
     datasets with precomputed differential expression and gene set enrichment,

@@ -33,6 +33,9 @@ gpsadb_connect <- function(url = gpsadb_url(),
                            timeout = getOption("gpsadb.timeout", 120)) {
   client <- new_mcp_client(url, headers = headers, timeout = timeout)
   .gpsadb_env$client <- client
+  .gpsadb_env$release <- NULL
+  .gpsadb_env$contract_checked <- FALSE
+  check_contract_on_connect(client)
   client
 }
 
@@ -71,6 +74,8 @@ gpsadb_disconnect <- function() {
   client <- .gpsadb_env$client
   if (!is.null(client)) client$close()
   .gpsadb_env$client <- NULL
+  .gpsadb_env$release <- NULL
+  .gpsadb_env$contract_checked <- FALSE
   invisible(NULL)
 }
 
@@ -87,7 +92,7 @@ gpsadb_disconnect <- function() {
 #' info$datasets
 #' @export
 gpsadb_info <- function(client = gpsadb_client()) {
-  client$call_tool_data("get_database_info")
+  gpsadb_call(client, "get_database_info")
 }
 
 #' Tools offered by the GPSAdb server
@@ -123,9 +128,11 @@ gpsadb_tool_catalog <- function(client = gpsadb_client()) {
 #' @param arguments Named list of tool arguments.
 #' @param client An MCP client; defaults to [gpsadb_client()].
 #' @return The tool payload as nested lists.
+#' @seealso [gpsadb_call()] for the pipe-friendly form (client first).
 #' @examplesIf interactive()
 #' gpsadb_raw("search_datasets", list(perturbed_gene = "TP53", limit = 2))
 #' @export
 gpsadb_raw <- function(tool, arguments = list(), client = gpsadb_client()) {
-  client$call_tool_data(tool, drop_nulls(arguments))
+  check_scalar(tool, "tool")
+  gpsadb_call(client, tool, arguments)
 }

@@ -124,3 +124,46 @@ test_that("gpsadb_result prints the scalars above the page", {
   expect_true(any(grepl("total: 71", out)))
   expect_true(any(grepl("gene", out)))
 })
+
+test_that("gpsadb_genes pulls the gene column out of a result", {
+  de <- new_gpsadb_result(
+    tibble::tibble(gene = c("CDKN1A", "GADD45A"), log2fc = c(1.7, 1.2)),
+    list(n_up = 2)
+  )
+  expect_equal(gpsadb_genes(de), c("CDKN1A", "GADD45A"))
+
+  hits <- new_gpsadb_result(
+    tibble::tibble(perturbed_gene = c("TP53", "TP53", "MDM2")),
+    list(total = 3)
+  )
+  expect_equal(gpsadb_genes(hits), c("TP53", "MDM2"))
+  expect_equal(gpsadb_genes(hits, unique = FALSE), c("TP53", "TP53", "MDM2"))
+})
+
+test_that("gpsadb_genes needs an explicit column when there is none", {
+  gsea <- new_gpsadb_result(
+    tibble::tibble(term = c("HALLMARK_HYPOXIA", "HALLMARK_TNFA_SIGNALING_VIA_NFKB")),
+    list(n_terms = 2)
+  )
+  expect_error(gpsadb_genes(gsea), "pass `column =`")
+  expect_equal(gpsadb_genes(gsea, column = "term")[1], "HALLMARK_HYPOXIA")
+  expect_error(gpsadb_genes(gsea, column = "nope"), "no column `nope`")
+  expect_error(gpsadb_genes(data.frame(gene = "A")), "must be a `gpsadb_result`")
+})
+
+test_that("gpsadb_genes drops blanks", {
+  res <- new_gpsadb_result(tibble::tibble(gene = c("A", NA, "", "B")))
+  expect_equal(gpsadb_genes(res), c("A", "B"))
+})
+
+test_that("$ reaches columns and still finds the envelope", {
+  res <- new_gpsadb_result(
+    tibble::tibble(gene = c("A", "B"), log2fc = c(1, 2)),
+    list(total = 71)
+  )
+  expect_equal(res$gene, c("A", "B"))
+  expect_equal(res$log2fc, c(1, 2))
+  expect_equal(nrow(res$data), 2L)
+  expect_equal(res$meta$total, 71)
+  expect_null(res$not_a_column)
+})

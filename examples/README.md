@@ -20,6 +20,8 @@ Rscript examples/01-explore-a-perturbation.R
 | `03-match-your-own-signature.R` | 我自己的差异表达结果像哪个基因被扰动？ | `fastgpsa`（双侧签名 / 排序表 / dataset_id 三种输入）、`biotrigger` | ~5 |
 | `04-batch-across-datasets.R` | 一个结论跨数据集稳不稳？ | 循环调 `de`，拼长表 / 矩阵 | 13 |
 | `05-agent-tools.R` | 让模型自己决定查什么 | `tool_catalog`、`tools()` + `aisdk::generate_text(tools=)` | 1（离线部分） |
+| `06-intent-to-code.R` | 一句话翻成 R 代码 | `gpsadb_intent()` + `eval()` | 1 次模型调用 |
+| `07-three-services.R` | 因果、关联、物理三个层面放在一起（HIF1A / PGK1） | GPSAdb + GTBAdb + STRING | ~6 |
 
 几个约定：
 

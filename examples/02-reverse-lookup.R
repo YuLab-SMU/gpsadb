@@ -48,16 +48,13 @@ if (nrow(hepg2)) {
   print(utils::head(hepg2[, c("dataset", "perturbed_gene", "log2fc", "padj")], 5))
 }
 
-# --- 4. 分页：哪些接口能翻页，哪些不能 ------------------------------------
-# 只有 search_datasets 有 offset；反查类接口（query_gene / query_gene_set）
-# 上限 500 条且没有 offset —— 命中超过 500 时要靠收窄条件，而不是翻页。
-cat(sprintf("\nCDKN1A 上调命中 %d 条 > 500，本页已被截断\n", gpsadb_meta(up, "total")))
+# --- 4. 分页：怎么翻完整个结果集 ------------------------------------------
+# 反查类接口每页最多 500 条，用 offset 翻页。命中总数看 meta$total。
+cat(sprintf("\nCDKN1A 上调命中 %d 条，每页 500 条\n", gpsadb_meta(up, "total")))
 
-strict <- gpsadb_query_gene("CDKN1A", direction = "up",
-                            padj_lt = 1e-10, min_abs_log2fc = 1, limit = 500)
-cat(sprintf("收窄到 padj<1e-10 且 |log2fc|>1 后：%d 条命中，本页 %d 条%s\n",
-            gpsadb_meta(strict, "total"), nrow(strict),
-            if (nrow(strict) < gpsadb_meta(strict, "total")) "（仍被截断）" else "（已完整）"))
+second <- gpsadb_query_gene("CDKN1A", direction = "up", limit = 500, offset = 500)
+cat(sprintf("第 2 页：%d 条（meta$offset = %s）\n",
+            nrow(second), gpsadb_meta(second, "offset")))
 
 # search_datasets 才是能翻页的那个：71 个 TP53 数据集，按 100 一页翻完
 paged <- do.call(rbind, lapply(0:1, function(i) {

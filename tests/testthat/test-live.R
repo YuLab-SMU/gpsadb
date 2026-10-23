@@ -45,7 +45,34 @@ test_that("live: reverse lookups and signature search", {
   expect_true("gscore" %in% names(sig$data))
 })
 
-test_that("live: errors from the server surface as mcp_tool_error", {
+test_that("live: errors from the server are typed", {
   skip_live()
-  expect_error(gpsadb_dataset("D00000"), class = "mcp_tool_error")
+  expect_error(gpsadb_dataset("D00000"), class = "gpsadb_not_found")
+})
+
+test_that("live: the contract still matches and provenance is recorded", {
+  skip_live()
+
+  expect_equal(nrow(gpsadb_contract_check()), 0L)
+
+  res <- gpsadb_de("D20305", limit = 1)
+  prov <- gpsadb_provenance(res)
+  expect_equal(prov$tool, "get_differential_expression")
+  expect_true(nzchar(prov$release))
+  expect_match(prov$queried_at, "Z$")
+})
+
+test_that("live: download links and bulk archives", {
+  skip_live()
+
+  files <- gpsadb_downloads("D20305")
+  expect_gte(nrow(files$data), 4L)
+  expect_true(all(grepl("^https://", files$data$url)))
+  # the per-dataset files are the DESeq2 table, the counts, the samples and the
+  # ranked list; the counts file is served as .../counts.csv
+  expect_true(all(c("diffresults.csv", "counts.csv") %in% basename(files$data$url)))
+
+  archives <- gpsadb_archives("counts")
+  expect_gt(nrow(archives$data), 0)
+  expect_true(all(nchar(archives$data$sha256) == 64))
 })

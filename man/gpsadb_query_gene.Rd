@@ -11,6 +11,7 @@ gpsadb_query_gene(
   min_abs_log2fc = 0,
   sort_by = c("padj", "log2fc"),
   limit = 50,
+  offset = 0,
   client = gpsadb_client()
 )
 }
@@ -26,7 +27,9 @@ or \code{"both"}.}
 
 \item{sort_by}{\code{"padj"} or \code{"log2fc"}.}
 
-\item{limit}{Maximum hits to return (1-500).}
+\item{limit}{Maximum hits to return per page (1-500).}
+
+\item{offset}{Skip this many matches (paging).}
 
 \item{client}{An MCP client; defaults to \code{\link[=gpsadb_client]{gpsadb_client()}}.}
 }

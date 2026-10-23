@@ -4,10 +4,15 @@
 \alias{gpsadb_tools}
 \title{GPSAdb tools as aisdk tools}
 \usage{
-gpsadb_tools(client = gpsadb_client())
+gpsadb_tools(client = gpsadb_client(), prefix = NULL)
 }
 \arguments{
 \item{client}{An MCP client; defaults to \code{\link[=gpsadb_client]{gpsadb_client()}}.}
+
+\item{prefix}{Prefix the tool names, e.g. \code{"gpsadb"} turns \code{query_gene} into
+\code{gpsadb__query_gene}. Tool names are flat across a whole agent session, so
+give every server a prefix when you put several of them in one \verb{tools=}
+list; \code{query_gene} and \code{search_datasets} are common enough to collide.}
 }
 \value{
 A list of \code{aisdk} tool objects, ready for the \verb{tools=} argument of
@@ -26,6 +31,7 @@ are exactly what the server advertises — no second copy to keep in sync.
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 tools <- gpsadb_tools()
 length(tools)
+gpsadb_tools(prefix = "gpsadb")[[1]]$name
 aisdk::generate_text(
   model = "deepseek:deepseek-chat",
   prompt = "Which perturbations mimic hypoxia in U-2 OS?",
@@ -34,5 +40,6 @@ aisdk::generate_text(
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=gpsadb_tool_catalog]{gpsadb_tool_catalog()}} to inspect the same tools as a tibble.
+\code{\link[=gpsadb_tool_catalog]{gpsadb_tool_catalog()}} to inspect the same tools as a tibble, and
+\code{aisdk.mcp::combine_mcp_tools()} to merge several servers at once.
 }

@@ -16,6 +16,15 @@ print(gpsadb_tool_catalog(), n = 20)
 
 tools <- gpsadb_tools()
 cat("\n工具数：", length(tools), "\n")
+
+# 同一个 agent 里还要连别的 MCP 服务器时，加前缀避免重名（query_gene 很常见）
+# prefixed <- gpsadb_tools(prefix = "gpsadb")   # gpsadb__query_gene
+
+# 或者一次合并多个服务器（前缀取自各服务器自己声明的名字）：
+# other    <- aisdk.mcp::create_mcp_http_client("https://other.example/mcp")
+# combined <- aisdk.mcp::combine_mcp_tools(gpsadb = gpsadb_client(), other = other)
+# vapply(combined, function(t) t$name, character(1))[1:2]   # gpsadb__get_database_info, ...
+
 cat("前两个：", tools[[1]]$name, "/", tools[[2]]$name, "\n")
 cat("search_datasets 的参数 schema：\n")
 spec <- tools[[2]]$to_api_format()

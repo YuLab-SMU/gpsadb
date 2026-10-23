@@ -4,10 +4,12 @@
 \alias{gpsadb_result}
 \alias{gpsadb_data}
 \alias{gpsadb_meta}
+\alias{gpsadb_genes}
 \alias{gpsadb_report_url}
 \alias{print.gpsadb_result}
 \alias{as.data.frame.gpsadb_result}
 \alias{as_tibble.gpsadb_result}
+\alias{$.gpsadb_result}
 \alias{dim.gpsadb_result}
 \alias{names.gpsadb_result}
 \alias{[.gpsadb_result}
@@ -19,6 +21,8 @@ gpsadb_data(x)
 
 gpsadb_meta(x, field = NULL)
 
+gpsadb_genes(x, column = NULL, unique = TRUE)
+
 gpsadb_report_url(x)
 
 \method{print}{gpsadb_result}(x, ...)
@@ -26,6 +30,8 @@ gpsadb_report_url(x)
 \method{as.data.frame}{gpsadb_result}(x, row.names = NULL, optional = FALSE, ...)
 
 \method{as_tibble}{gpsadb_result}(x, ...)
+
+\method{$}{gpsadb_result}(x, name)
 
 \method{dim}{gpsadb_result}(x)
 
@@ -43,9 +49,18 @@ gpsadb_report_url(x)
 \item{field}{Name of one scalar in the result's metadata. When given, that
 value is returned instead of the whole list.}
 
+\item{column}{Column to take the genes from. Defaults to \code{gene}, then
+\code{perturbed_gene}; pass it explicitly for results whose genes live elsewhere
+(a GSEA result keeps pathway names in \code{term}).}
+
+\item{unique}{Drop duplicates (default \code{TRUE}), which is what a downstream
+service usually wants.}
+
 \item{...}{Passed on to the underlying method.}
 
 \item{row.names, optional}{Ignored; the data is always a fresh data frame.}
+
+\item{name}{A field or column name.}
 
 \item{i, j}{Row and column selectors, as for a data frame. Indexing returns a
 plain tibble: the scalars describe the full query, so they are dropped
@@ -81,6 +96,8 @@ gpsadb_data(hits)       # the tibble itself (hand it to dplyr)
 gpsadb_meta(hits)       # the scalars as a list
 gpsadb_meta(hits, "total")
 gpsadb_report_url(hits) # the website report, when there is one
+gpsadb_genes(hits)      # the gene symbols, ready for the next service
+hits$gene               # a column, as on a data frame
 }\if{html}{\out{</div>}}
 
 \verb{$data} and \verb{$meta} still work; the accessors exist so you do not have to

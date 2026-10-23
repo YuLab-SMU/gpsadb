@@ -29,3 +29,18 @@ test_that("gpsadb_info exposes the database metadata", {
   expect_equal(info$datasets, 7665L)
   expect_equal(called_tool(client), "get_database_info")
 })
+
+test_that("tool names can be prefixed for a multi-server agent", {
+  client <- fake_client()
+  client$as_sdk_tools <- function() {
+    list(list(name = "sdk_tool_one"), list(name = "sdk_tool_two"))
+  }
+  tools <- gpsadb_tools(client = client, prefix = "gpsadb")
+
+  expect_equal(
+    vapply(tools, function(t) t$name, character(1)),
+    c("gpsadb__sdk_tool_one", "gpsadb__sdk_tool_two")
+  )
+  expect_error(gpsadb_tools(client = client, prefix = "1bad"), "must start with a letter")
+  expect_error(gpsadb_tools(client = client, prefix = c("a", "b")), "single non-empty string")
+})

@@ -26,3 +26,6 @@ what the wrappers send. Arguments are passed through as given, except that
 gpsadb_raw("search_datasets", list(perturbed_gene = "TP53", limit = 2))
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+\code{\link[=gpsadb_call]{gpsadb_call()}} for the pipe-friendly form (client first).
+}

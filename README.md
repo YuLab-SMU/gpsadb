@@ -83,11 +83,13 @@ query, so keeping them on a filtered subset would leave them quietly wrong.
 | `gpsadb_de()` | What changed in this perturbation? (DESeq2) |
 | `gpsadb_gsea()` | Which pathways changed? (precomputed GSEA) |
 | `gpsadb_test_gene_set()` | Run GSEA of my own gene set in one dataset |
-| `gpsadb_query_gene()` | Which perturbations change gene X? |
+| `gpsadb_query_gene()` | Which perturbations change gene X? (pages 500 at a time) |
 | `gpsadb_query_gene_set()` | Which perturbations change pathway Y? |
 | `gpsadb_search_gene_sets()` | What is the exact term name? |
 | `gpsadb_biotrigger()` | Which perturbations activate/inhibit my gene set? |
 | `gpsadb_fastgpsa()` | Which perturbations mimic or reverse my signature? |
+| `gpsadb_downloads()` | Where are this dataset's DESeq2 results, counts and gene list? |
+| `gpsadb_archives()` | Where are the bulk archives, with SHA-256? |
 
 Lower-level access when a tool is not wrapped yet: `gpsadb_tool_catalog()`,
 `gpsadb_raw(tool, arguments)`, `gpsadb_client()$call_tool_data(...)`.
@@ -119,6 +121,78 @@ aisdk::generate_text(
 )
 ```
 
+Tool names are flat across a whole session, and `query_gene` / `search_datasets`
+are common enough to collide. When one agent talks to several MCP servers, give
+each server a prefix or merge them with `aisdk.mcp::combine_mcp_tools()`:
+
+```r
+tools <- gpsadb_tools(prefix = "gpsadb")   # gpsadb__query_gene, ...
+# or let aisdk.mcp merge several servers at once
+combined <- aisdk.mcp::combine_mcp_tools(gpsadb = gpsadb_client(), other = other)
+```
+
+## From a question to a call
+
+Turn a question into the R code that answers it:
+
+```r
+q <- gpsadb_intent("Which perturbations knock CDKN1A down in HeLa?")
+q
+#> {
+#>     hits <- gpsadb_query_gene("CDKN1A", direction = "down", limit = 500)
+#>     d <- gpsadb_data(hits)
+#>     d[grepl("HeLa", d$cell_line), ]
+#> }
+```
+
+`gpsadb_intent()` needs a model (`model =`, or
+`options(gpsadb.intent_model = ...)`); everything else is offline. The value is
+an ordinary R expression or `{ }` block: print it, store it, diff it.
+
+Look at the code first, then run it with `eval()`:
+
+```r
+res <- eval(q)
+nrow(res)   # 21 HeLa hits among the top 500
+```
+
+The wrappers check arguments locally, before any request is sent, so a wrong
+value fails fast. Parts of the question that cannot be expressed are returned
+as an `unmatched` attribute and printed, rather than turned into an argument
+the server would reject.
+
+## Reproducibility
+
+The endpoint is a live service, so a number only means something together with
+the call that produced it:
+
+```r
+res <- gpsadb_de("D20305", limit = 5)
+gpsadb_provenance(res)[c("tool", "arguments", "release", "server_version", "queried_at")]
+```
+
+Every result carries the tool, the arguments, the data `release`, the server
+build and the call time; `print()` ends with the release and build. To go
+further, download the inputs and recompute:
+
+```r
+gpsadb_downloads("D20305")[, c("file", "url")]   # counts.csv, diffresults.csv, ...
+gpsadb_archives("counts")[, c("name", "size_mb", "sha256")]
+```
+
+A worked example that puts a second MCP service next to this one (GPSAdb's
+perturbation transcriptomes plus PDBe's experimental structures) is in
+[`docs/combining-services.md`](docs/combining-services.md).
+
+The server's tool contract is pinned in the package and checked on connect:
+`gpsadb_contract_check()` lists a tool that disappeared, a tool the package does
+not wrap yet, or a parameter that moved. Set
+`options(gpsadb.check_contract = FALSE)` to silence the warning.
+
+Errors are typed, so a script can react without matching text:
+`gpsadb_not_found` (unknown dataset, gene not in GPSAdb),
+`gpsadb_invalid_input`, `gpsadb_error`.
+
 ## How it connects
 
 ```
@@ -135,7 +209,7 @@ gpsadb_*()  ->  aisdk.mcp  ->  POST https://gpsadb.gzdlab.com/mcp
 
 ## Examples
 
-[`examples/`](examples/) holds five standalone scripts, each answering one
+[`examples/`](examples/) holds six standalone scripts, each answering one
 question:
 
 | Script | Question |
@@ -145,6 +219,7 @@ question:
 | [`03-match-your-own-signature.R`](examples/03-match-your-own-signature.R) | Which perturbation does my signature look like? |
 | [`04-batch-across-datasets.R`](examples/04-batch-across-datasets.R) | Is the effect consistent across datasets? |
 | [`05-agent-tools.R`](examples/05-agent-tools.R) | Let a model decide what to query |
+| [`06-intent-to-code.R`](examples/06-intent-to-code.R) | Turn a question into R code |
 
 ```bash
 Rscript examples/03-match-your-own-signature.R
@@ -153,10 +228,9 @@ Rscript examples/03-match-your-own-signature.R
 ## Notes
 
 * A result is one page. Compare `nrow(x)` with `gpsadb_meta(x, "total")`.
-* Only `gpsadb_search_datasets()` pages (`offset=`, 200 per request). The
-  reverse lookups (`query_gene`, `query_gene_set`) and the signature searches
-  cap at 500 hits with no `offset`, so narrow the filters
-  (`padj_lt`, `min_abs_log2fc`) instead of paging.
+* `gpsadb_search_datasets()` pages 200 at a time; the reverse lookups
+  (`query_gene`, `query_gene_set`) page 500 at a time. The signature searches do
+  not page: narrow their filters instead.
 * Nested fields (`core_genes`, `genes`, `attributes`) are list columns.
 * Gene lists are sent as JSON arrays, so a single gene works as well as a
   vector.

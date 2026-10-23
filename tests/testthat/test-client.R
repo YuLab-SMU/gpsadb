@@ -99,3 +99,14 @@ test_that("gpsadb_raw passes the tool name through", {
   expect_equal(called_tool(client), "get_database_info")
   expect_equal(info$datasets, 7665L)
 })
+
+test_that("gpsadb_call is the pipe-friendly form of gpsadb_raw", {
+  client <- fake_client(list(search_datasets = fixture_datasets()))
+
+  piped <- client |> gpsadb_call("search_datasets", list(limit = 1))
+  expect_equal(piped$total, 71L)
+  expect_equal(attr(piped, "provenance")$tool, "search_datasets")
+
+  interactive_form <- gpsadb_raw("search_datasets", list(limit = 1), client = client)
+  expect_equal(piped$total, interactive_form$total)
+})

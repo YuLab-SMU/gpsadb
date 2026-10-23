@@ -40,6 +40,10 @@ cat("原始数据下载:", gpsadb_meta(ds, "downloads")$raw_counts_csv, "\n")
 print(ds[1, c("name", "group")])
 str(gpsadb_data(ds)$attributes[[1]], max.level = 1)
 
+# 不想只信预计算的表？原始 counts、样本注释、DESeq2 结果、排序表都在这里
+files <- gpsadb_downloads(id)
+print(files[, c("file", "content", "url")])
+
 # --- 3. 敲低之后哪些基因动了 -----------------------------------------------
 cat("\n--- 下调最显著的 10 个基因 ---\n")
 down <- gpsadb_de(id, direction = "down", limit = 10)

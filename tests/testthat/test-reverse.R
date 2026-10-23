@@ -62,3 +62,27 @@ test_that("gpsadb_search_gene_sets exposes optional member genes", {
   expect_false("contains_gene" %in% names(args))
   expect_false("library" %in% names(args))
 })
+
+test_that("the reverse lookups page with offset", {
+  paged <- fixture_hits()
+  paged$offset <- 500L
+  client <- fake_client(list(query_gene = paged))
+
+  res <- gpsadb_query_gene("CDKN1A", direction = "up", limit = 500, offset = 500,
+                           client = client)
+  expect_equal(gpsadb_meta(res, "offset"), 500L)
+  expect_equal(called_args(client)$offset, 500)
+
+  paged_set <- list(
+    library = "Hallmarks", term = "HALLMARK_HYPOXIA", set_size = 200L,
+    padj_lt = 0.05, total = 3955L, n_up = 2035L, n_down = 1920L,
+    offset = 500L, returned = 1L,
+    hits = list(list(dataset = "D27689", perturbed_gene = "TRIM28",
+                     method = "shRNA", cell_line = "HFF", nes = -3.21,
+                     padj = 1.79e-10))
+  )
+  client2 <- fake_client(list(query_gene_set = paged_set))
+  res2 <- gpsadb_query_gene_set("HALLMARK_HYPOXIA", offset = 500, client = client2)
+  expect_equal(gpsadb_meta(res2, "offset"), 500L)
+  expect_equal(called_args(client2)$offset, 500)
+})

@@ -38,7 +38,7 @@ gpsadb_search_datasets <- function(query = NULL,
                                    limit = 50,
                                    offset = 0,
                                    client = gpsadb_client()) {
-  res <- client$call_tool_data("search_datasets", drop_nulls(list(
+  res <- gpsadb_call(client, "search_datasets", drop_nulls(list(
     query = query,
     perturbed_gene = perturbed_gene,
     method = method,
@@ -55,7 +55,8 @@ gpsadb_search_datasets <- function(query = NULL,
       "oncotree_code", "n_samples", "n_up", "n_down", "in_reference"
     )),
     list(total = res$total, offset = res$offset, returned = res$returned)
-  )
+  ,
+    provenance = attr(res, "provenance"))
 }
 
 #' Metadata of one dataset
@@ -75,10 +76,11 @@ gpsadb_search_datasets <- function(query = NULL,
 #' @export
 gpsadb_dataset <- function(dataset_id, client = gpsadb_client()) {
   check_dataset_id(dataset_id)
-  res <- client$call_tool_data("get_dataset", list(dataset_id = dataset_id))
+  res <- gpsadb_call(client, "get_dataset", list(dataset_id = dataset_id))
   samples <- res$samples
   res$samples <- NULL
-  new_gpsadb_result(records_to_tibble(samples), res)
+  new_gpsadb_result(records_to_tibble(samples), res,
+    provenance = attr(res, "provenance"))
 }
 
 # --- per-dataset measurements ---------------------------------------------
@@ -114,7 +116,7 @@ gpsadb_de <- function(dataset_id,
                       limit = 25,
                       client = gpsadb_client()) {
   check_dataset_id(dataset_id)
-  res <- client$call_tool_data("get_differential_expression", drop_nulls(list(
+  res <- gpsadb_call(client, "get_differential_expression", drop_nulls(list(
     dataset_id = dataset_id,
     genes = as_array(genes),
     direction = match.arg(direction),
@@ -127,7 +129,8 @@ gpsadb_de <- function(dataset_id,
     records_to_tibble(res$genes),
     pick_meta(res, c("dataset_id", "title", "n_genes_tested", "padj_lt",
           "n_up", "n_down", "returned", "url"))
-  )
+  ,
+    provenance = attr(res, "provenance"))
 }
 
 #' Precomputed gene set enrichment of one dataset
@@ -163,7 +166,7 @@ gpsadb_gsea <- function(dataset_id,
                         include_core_genes = FALSE,
                         client = gpsadb_client()) {
   check_dataset_id(dataset_id)
-  res <- client$call_tool_data("get_gsea_results", drop_nulls(list(
+  res <- gpsadb_call(client, "get_gsea_results", drop_nulls(list(
     dataset_id = dataset_id,
     library = library,
     terms = as_array(terms),
@@ -176,7 +179,8 @@ gpsadb_gsea <- function(dataset_id,
     records_to_tibble(res$terms),
     pick_meta(res, c("dataset_id", "title", "library", "n_terms", "padj_lt",
           "n_significant", "returned", "url"))
-  )
+  ,
+    provenance = attr(res, "provenance"))
 }
 
 #' Full GSEA of your own gene set in one dataset
@@ -196,9 +200,10 @@ gpsadb_gsea <- function(dataset_id,
 gpsadb_test_gene_set <- function(dataset_id, genes, client = gpsadb_client()) {
   check_dataset_id(dataset_id)
   if (!length(genes)) stop("`genes` must hold at least one gene symbol", call. = FALSE)
-  res <- client$call_tool_data("test_gene_set_in_dataset", list(
+  res <- gpsadb_call(client, "test_gene_set_in_dataset", list(
     dataset_id = dataset_id,
     genes = as_array(genes)
   ))
-  new_gpsadb_result(records_to_tibble(list(res)))
+  new_gpsadb_result(records_to_tibble(list(res)),
+    provenance = attr(res, "provenance"))
 }

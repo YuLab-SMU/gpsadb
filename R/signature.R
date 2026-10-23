@@ -21,7 +21,7 @@ gpsadb_biotrigger <- function(genes,
                               limit = 20,
                               client = gpsadb_client()) {
   if (!length(genes)) stop("`genes` must hold at least one gene symbol", call. = FALSE)
-  res <- client$call_tool_data("run_biotrigger", list(
+  res <- gpsadb_call(client, "run_biotrigger", list(
     genes = as_array(genes),
     effect = match.arg(effect),
     limit = limit
@@ -30,7 +30,8 @@ gpsadb_biotrigger <- function(genes,
     records_to_tibble(res$results),
     pick_meta(res, c("hash", "release", "url", "n_genes", "n_matched", "n_datasets",
           "returned"))
-  )
+  ,
+    provenance = attr(res, "provenance"))
 }
 
 #' fastGPSA: which perturbations mimic or reverse a signature?
@@ -124,7 +125,7 @@ gpsadb_fastgpsa <- function(up_genes = NULL,
     }
   }
 
-  res <- client$call_tool_data("run_fastgpsa", drop_nulls(list(
+  res <- gpsadb_call(client, "run_fastgpsa", drop_nulls(list(
     up_genes = up_genes,
     down_genes = down_genes,
     ranked_list = ranked_list,
@@ -136,5 +137,6 @@ gpsadb_fastgpsa <- function(up_genes = NULL,
     records_to_tibble(res$results),
     pick_meta(res, c("hash", "release", "url", "source", "n_up_genes", "n_down_genes",
           "n_datasets", "returned"))
-  )
+  ,
+    provenance = attr(res, "provenance"))
 }

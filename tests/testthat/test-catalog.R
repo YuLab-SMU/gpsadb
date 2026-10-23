@@ -128,5 +128,5 @@ test_that("tool-level errors propagate with their message", {
     }
   ))
   expect_error(gpsadb_dataset("D99999", client = client),
-               "unknown dataset", class = "mcp_tool_error")
+               "unknown dataset", class = "gpsadb_not_found")
 })

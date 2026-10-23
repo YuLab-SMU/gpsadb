@@ -11,6 +11,7 @@ gpsadb_query_gene_set(
   direction = c("both", "up", "down"),
   sort_by = c("padj", "nes"),
   limit = 50,
+  offset = 0,
   client = gpsadb_client()
 )
 }
@@ -26,7 +27,9 @@ gpsadb_query_gene_set(
 
 \item{sort_by}{\code{"padj"} or \code{"nes"}.}
 
-\item{limit}{Maximum hits to return (1-500).}
+\item{limit}{Maximum hits to return per page (1-500).}
+
+\item{offset}{Skip this many matches (paging).}
 
 \item{client}{An MCP client; defaults to \code{\link[=gpsadb_client]{gpsadb_client()}}.}
 }

@@ -50,6 +50,8 @@ called_tool <- function(client, n = 1L) {
 
 clear_client <- function() {
   .gpsadb_env$client <- NULL
+  .gpsadb_env$release <- NULL
+  .gpsadb_env$contract_checked <- FALSE
   invisible(NULL)
 }
 
