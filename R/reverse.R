@@ -14,9 +14,9 @@
 #' @param sort_by `"padj"` or `"log2fc"`.
 #' @param limit Maximum hits to return (1-500).
 #' @param client An MCP client; defaults to [gpsadb_client()].
-#' @return A `gpsadb_result`; `$data` has `dataset`, `perturbed_gene`, `method`,
-#'   `cell_line`, `log2fc`, `padj`, `base_mean`. `$meta` has `total`, `n_up`,
-#'   `n_down`.
+#' @return A [gpsadb_result]; its data has `dataset`, `perturbed_gene`, `method`,
+#'   `cell_line`, `log2fc`, `padj`, `base_mean`, and `gpsadb_meta()` has `total`,
+#'   `n_up`, `n_down`.
 #' @examplesIf interactive()
 #' gpsadb_query_gene("CDKN1A", direction = "up", limit = 10)
 #' @export
@@ -38,7 +38,7 @@ gpsadb_query_gene <- function(gene,
   ))
   new_gpsadb_result(
     records_to_tibble(res$hits),
-    res[c("gene", "padj_lt", "total", "n_up", "n_down", "returned")]
+    pick_meta(res, c("gene", "padj_lt", "total", "n_up", "n_down", "returned"))
   )
 }
 
@@ -56,8 +56,8 @@ gpsadb_query_gene <- function(gene,
 #' @param sort_by `"padj"` or `"nes"`.
 #' @param limit Maximum hits to return (1-500).
 #' @param client An MCP client; defaults to [gpsadb_client()].
-#' @return A `gpsadb_result`; `$data` has `dataset`, `perturbed_gene`, `method`,
-#'   `cell_line`, `nes`, `padj`. `$meta` has `total`, `n_up`, `n_down`.
+#' @return A [gpsadb_result]; its data has `dataset`, `perturbed_gene`, `method`,
+#'   `cell_line`, `nes`, `padj`, and `gpsadb_meta()` has `total`, `n_up`, `n_down`.
 #' @examplesIf interactive()
 #' gpsadb_query_gene_set("HALLMARK_HYPOXIA", limit = 10)
 #' @export
@@ -79,8 +79,8 @@ gpsadb_query_gene_set <- function(term,
   )))
   new_gpsadb_result(
     records_to_tibble(res$hits),
-    res[c("library", "term", "set_size", "padj_lt", "total", "n_up", "n_down",
-          "returned")]
+    pick_meta(res, c("library", "term", "set_size", "padj_lt", "total", "n_up", "n_down",
+          "returned"))
   )
 }
 
@@ -98,7 +98,7 @@ gpsadb_query_gene_set <- function(term,
 #' @param include_genes Include member genes (at most 50 terms).
 #' @param limit Maximum terms to return (1-200).
 #' @param client An MCP client; defaults to [gpsadb_client()].
-#' @return A `gpsadb_result`; `$data` has `library`, `term`, `size`, `testable`
+#' @return A [gpsadb_result]; its data has `library`, `term`, `size`, `testable`
 #'   and (optionally) `genes` as a list column.
 #' @examplesIf interactive()
 #' gpsadb_search_gene_sets(query = "hypoxia", limit = 10)
@@ -121,6 +121,6 @@ gpsadb_search_gene_sets <- function(query = NULL,
   )))
   new_gpsadb_result(
     records_to_tibble(res$gene_sets),
-    res[c("total", "returned")]
+    pick_meta(res, c("total", "returned"))
   )
 }

@@ -31,9 +31,9 @@ or \code{"both"}.}
 \item{client}{An MCP client; defaults to \code{\link[=gpsadb_client]{gpsadb_client()}}.}
 }
 \value{
-A \code{gpsadb_result}; \verb{$data} has \code{dataset}, \code{perturbed_gene}, \code{method},
-\code{cell_line}, \code{log2fc}, \code{padj}, \code{base_mean}. \verb{$meta} has \code{total}, \code{n_up},
-\code{n_down}.
+A \link{gpsadb_result}; its data has \code{dataset}, \code{perturbed_gene}, \code{method},
+\code{cell_line}, \code{log2fc}, \code{padj}, \code{base_mean}, and \code{gpsadb_meta()} has \code{total},
+\code{n_up}, \code{n_down}.
 }
 \description{
 Reverse lookup: which perturbations (in any dataset) significantly change

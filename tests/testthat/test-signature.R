@@ -117,3 +117,22 @@ test_that("a string ranked list is passed through", {
   gpsadb_fastgpsa(ranked_list = text, client = client)
   expect_equal(called_args(client)$ranked_list, text)
 })
+
+test_that("metadata only holds the fields the server actually returned", {
+  # the two-sided mode does not always come back with hash/url
+  no_hash <- fixture_fastgpsa()
+  no_hash$hash <- NULL
+  no_hash$url <- NULL
+  client <- fake_client(list(run_fastgpsa = no_hash))
+
+  res <- gpsadb_fastgpsa(
+    up_genes = c("HIF1A", "VEGFA", "SLC2A1", "PDK1", "BNIP3"),
+    down_genes = c("TP53", "CDKN1A", "GADD45A", "MDM2", "BAX"),
+    client = client
+  )
+
+  expect_false(any(is.na(names(res$meta))))
+  expect_false("hash" %in% names(res$meta))
+  expect_true(is.na(gpsadb_report_url(res)))
+  expect_error(gpsadb_meta(res, "hash"), "Available:")
+})

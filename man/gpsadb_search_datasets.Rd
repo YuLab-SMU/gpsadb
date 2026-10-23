@@ -46,8 +46,8 @@ comma separated for several.}
 \item{client}{An MCP client; defaults to \code{\link[=gpsadb_client]{gpsadb_client()}}.}
 }
 \value{
-A \code{gpsadb_result}; \verb{$data} has one row per dataset, \verb{$meta$total}
-the number of matches overall.
+A \link{gpsadb_result}: \code{gpsadb_data()} has one row per dataset,
+\code{gpsadb_meta(x, "total")} the number of matches overall.
 }
 \description{
 Filters are optional and combined with AND; text filters ignore case and

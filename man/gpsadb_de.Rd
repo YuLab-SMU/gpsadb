@@ -36,7 +36,7 @@ chosen direction, by absolute value for \code{"both"}).}
 \item{client}{An MCP client; defaults to \code{\link[=gpsadb_client]{gpsadb_client()}}.}
 }
 \value{
-A \code{gpsadb_result}; \verb{$data} has \code{gene}, \code{gene_id}, \code{log2fc}, \code{padj},
+A \link{gpsadb_result}; its data has \code{gene}, \code{gene_id}, \code{log2fc}, \code{padj},
 \code{pvalue}, \code{base_mean}.
 }
 \description{

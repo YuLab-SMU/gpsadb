@@ -31,8 +31,8 @@ gpsadb_query_gene_set(
 \item{client}{An MCP client; defaults to \code{\link[=gpsadb_client]{gpsadb_client()}}.}
 }
 \value{
-A \code{gpsadb_result}; \verb{$data} has \code{dataset}, \code{perturbed_gene}, \code{method},
-\code{cell_line}, \code{nes}, \code{padj}. \verb{$meta} has \code{total}, \code{n_up}, \code{n_down}.
+A \link{gpsadb_result}; its data has \code{dataset}, \code{perturbed_gene}, \code{method},
+\code{cell_line}, \code{nes}, \code{padj}, and \code{gpsadb_meta()} has \code{total}, \code{n_up}, \code{n_down}.
 }
 \description{
 Reverse lookup over the precomputed GSEA of every dataset: which

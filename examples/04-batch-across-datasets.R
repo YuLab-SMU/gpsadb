@@ -12,22 +12,22 @@ genes <- c("TP53", "MDM2", "CDKN1A", "GADD45A", "BAX", "BBC3")
 # --- 1. 收集数据集 ---------------------------------------------------------
 sets <- gpsadb_search_datasets(perturbed_gene = "TP53", reference_only = TRUE,
                                limit = 200)
-cat("参考集里扰动 TP53 的数据集：", nrow(sets$data), "/", sets$meta$total, "\n")
-print(table(sets$data$method))
+cat("参考集里扰动 TP53 的数据集：", nrow(sets), "/", gpsadb_meta(sets, "total"), "\n")
+print(table(gpsadb_data(sets)$method))
 
-ids <- sets$data$id
+ids <- gpsadb_data(sets)$id
 cat("本次取前 12 个跑：", paste(ids[1:12], collapse = ", "), "\n")
 
 # --- 2. 逐个取这 6 个基因的差异表达 ---------------------------------------
 rows <- lapply(ids[1:12], function(id) {
-  d <- gpsadb_de(id, genes = genes)$data
+  d <- gpsadb_de(id, genes = genes)
   if (!nrow(d)) return(NULL)
   cbind(dataset = id, d[, c("gene", "log2fc", "padj")])
 })
 de <- do.call(rbind, rows)
 
 # 拼上数据集元信息（细胞系、方法），这样表能直接拿去报告
-meta <- sets$data[, c("id", "cell_line", "method", "n_samples")]
+meta <- sets[, c("id", "cell_line", "method", "n_samples")]
 names(meta)[1] <- "dataset"
 de <- merge(de, meta, by = "dataset")
 de <- de[order(de$dataset, de$gene), ]

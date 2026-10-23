@@ -24,7 +24,9 @@ Rscript examples/01-explore-a-perturbation.R
 几个约定：
 
 - 都从 `library(gpsadb)` 开始，一次调用 = 一次 MCP 请求，单次 0.6–1.1 s。
-- `$data` 是 tibble，`$meta` 是标量（`total`、`n_up`、`n_down`、报告页 URL）。
+- 结果是 S3 对象，能当表用：`nrow(res)`、`res[1:3, c("id", "method")]`、`head(res)`。
+  整张表用 `gpsadb_data()`，标量用 `gpsadb_meta(res)` / `gpsadb_meta(res, "total")`，
+  报告页用 `gpsadb_report_url(res)`（没有就是 `NA`）。
 - 反查类接口（`query_gene` / `query_gene_set`）上限 500 条且**没有 offset**；只有
   `search_datasets` 能翻页。命中超过 500 时靠收窄条件（`padj_lt`、`min_abs_log2fc`）。
 - 写文件一律写 `tempdir()`，不落在工作目录（`04` 里有例子）。

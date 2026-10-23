@@ -15,15 +15,15 @@ gpsadb_dataset(dataset_id, client = gpsadb_client())
 A \code{gpsadb_result}.
 }
 \description{
-\verb{$data} holds the samples with their group (\code{control} / \code{treat}) and
-phenotype attributes; \verb{$meta} holds the dataset-level fields: perturbed gene,
-method, cell line and tissue, data source and accession, download links, and
-the website URL.
+\code{gpsadb_data()} holds the samples with their group (\code{control} / \code{treat}) and
+phenotype attributes; \code{gpsadb_meta()} holds the dataset-level fields:
+perturbed gene, method, cell line and tissue, data source and accession,
+download links, and the website URL.
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 ds <- gpsadb_dataset("D20305")
-ds$meta$title
-ds$data
+gpsadb_meta(ds, "title")
+gpsadb_data(ds)
 \dontshow{\}) # examplesIf}
 }

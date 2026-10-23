@@ -73,4 +73,4 @@ cat("\n--- 调用轨迹 ---\n")
 str(result[setdiff(names(result), "text")], max.level = 1)
 
 # 想复查模型引用的数字，直接用同一个 dataset id 复核：
-# gpsadb_gsea("D20305", limit = 5)$data
+# gpsadb_gsea("D20305", limit = 5)

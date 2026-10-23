@@ -5,9 +5,10 @@ precomputed differential expression and gene set enrichment.
 
 Data comes from the database's public Model Context Protocol (MCP) endpoint
 through the [`aisdk.mcp`](https://github.com/YuLab-SMU/aisdk.mcp) client, so
-results land in R already tidy: every query returns a `gpsadb_result` whose
-`$data` is a tibble and whose `$meta` holds the scalars that describe it
-(total hits, up/down counts, the web report URL).
+results land in R already tidy: every query returns a `gpsadb_result`, which
+indexes like a data frame, hands you the tibble with `gpsadb_data()`, and keeps
+the scalars that describe it (total hits, up/down counts, the web report URL)
+in `gpsadb_meta()`.
 
 No registration, no API key.
 
@@ -28,13 +29,13 @@ gpsadb_info()                    # release, counts, gene-set libraries
 
 # 1. find datasets
 tp53 <- gpsadb_search_datasets(perturbed_gene = "TP53", limit = 5)
-tp53$meta$total                  # 71 datasets perturb TP53
-tp53$data
+gpsadb_meta(tp53, "total")       # 71 datasets perturb TP53
+tp53[, c("id", "method", "cell_line")]
 
 # 2. inspect one
 ds <- gpsadb_dataset("D20305")
-ds$meta$title                    # D20305(Knock_down TP53 in U-2 OS)
-ds$data                          # samples, with group + phenotype
+gpsadb_meta(ds, "title")         # D20305(Knock_down TP53 in U-2 OS)
+gpsadb_data(ds)                  # samples, with group + phenotype
 
 # 3. what the perturbation did
 gpsadb_de("D20305", direction = "down", limit = 10)
@@ -48,6 +49,29 @@ gpsadb_query_gene_set("HALLMARK_HYPOXIA")          # what activates hypoxia?
 gpsadb_biotrigger(c("HIF1A", "VEGFA", "SLC2A1", "PDK1", "BNIP3"))
 gpsadb_fastgpsa(dataset_id = "D20305", direction = "opposite")
 ```
+
+## Working with a result
+
+Every query returns the same S3 object, so you learn this once:
+
+```r
+hits <- gpsadb_search_datasets(perturbed_gene = "TP53")
+
+hits                  # the scalars first, the page below
+nrow(hits)            # rows in this page
+hits[1:3, ]           # ordinary data-frame indexing
+hits[, c("id", "method")]
+head(hits)
+
+gpsadb_data(hits)     # the tibble itself, for dplyr
+gpsadb_meta(hits)     # the scalars as a list
+gpsadb_meta(hits, "total")
+gpsadb_report_url(hits)   # the website report, when there is one
+```
+
+Indexing returns a plain tibble on purpose: the scalars describe the whole
+query, so keeping them on a filtered subset would leave them quietly wrong.
+`$data` and `$meta` still work if you prefer them.
 
 ## Functions
 
@@ -74,7 +98,7 @@ Lower-level access when a tool is not wrapped yet: `gpsadb_tool_catalog()`,
 computed here can be matched against 7,000+ perturbation datasets:
 
 ```r
-de <- gpsadb_de("D20305", limit = 500)$data   # or your own DESeq2 output
+de <- gpsadb_de("D20305", limit = 500)   # or your own DESeq2 output
 gpsadb_fastgpsa(ranked_list = de[, c("gene", "log2fc")])
 ```
 
@@ -128,7 +152,7 @@ Rscript examples/03-match-your-own-signature.R
 
 ## Notes
 
-* `$data` is one page. Compare `nrow($data)` with `$meta$total`.
+* A result is one page. Compare `nrow(x)` with `gpsadb_meta(x, "total")`.
 * Only `gpsadb_search_datasets()` pages (`offset=`, 200 per request). The
   reverse lookups (`query_gene`, `query_gene_set`) and the signature searches
   cap at 500 hits with no `offset`, so narrow the filters

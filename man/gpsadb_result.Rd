@@ -2,23 +2,91 @@
 % Please edit documentation in R/result.R
 \name{gpsadb_result}
 \alias{gpsadb_result}
+\alias{gpsadb_data}
+\alias{gpsadb_meta}
+\alias{gpsadb_report_url}
+\alias{print.gpsadb_result}
 \alias{as.data.frame.gpsadb_result}
+\alias{as_tibble.gpsadb_result}
+\alias{dim.gpsadb_result}
+\alias{names.gpsadb_result}
+\alias{[.gpsadb_result}
+\alias{head.gpsadb_result}
+\alias{tail.gpsadb_result}
 \title{GPSAdb results}
 \usage{
+gpsadb_data(x)
+
+gpsadb_meta(x, field = NULL)
+
+gpsadb_report_url(x)
+
+\method{print}{gpsadb_result}(x, ...)
+
 \method{as.data.frame}{gpsadb_result}(x, row.names = NULL, optional = FALSE, ...)
+
+\method{as_tibble}{gpsadb_result}(x, ...)
+
+\method{dim}{gpsadb_result}(x)
+
+\method{names}{gpsadb_result}(x)
+
+\method{[}{gpsadb_result}(x, i, j, ..., drop = FALSE)
+
+\method{head}{gpsadb_result}(x, n = 6L, ...)
+
+\method{tail}{gpsadb_result}(x, n = 6L, ...)
 }
 \arguments{
 \item{x}{A \code{gpsadb_result}.}
 
+\item{field}{Name of one scalar in the result's metadata. When given, that
+value is returned instead of the whole list.}
+
+\item{...}{Passed on to the underlying method.}
+
 \item{row.names, optional}{Ignored; the data is always a fresh data frame.}
 
-\item{...}{Passed on to \code{\link[base:as.data.frame]{base::as.data.frame()}}.}
+\item{i, j}{Row and column selectors, as for a data frame. Indexing returns a
+plain tibble: the scalars describe the full query, so they are dropped
+rather than silently kept and left stale.}
+
+\item{drop}{Passed on to the tibble's \code{[}.}
+
+\item{n}{Number of rows to show.}
+}
+\value{
+\code{gpsadb_data()} returns the tibble, \code{gpsadb_meta()} a list (or one
+value when \code{field} is given), \code{gpsadb_report_url()} a string or \code{NA}, and the
+indexing methods a tibble.
 }
 \description{
-Every \verb{gpsadb_*()} query returns a \code{gpsadb_result}: \verb{$data} is a tibble with
-one row per record, \verb{$meta} holds the scalars that describe the table (total
-number of hits, how many were up/down, the website report URL, ...).
+Every \verb{gpsadb_*()} query returns a \code{gpsadb_result}: a small S3 envelope that
+keeps the table and the scalars that describe it together, so paging
+(\code{nrow()} versus the total number of hits) stays visible.
 
-Paging is explicit: \verb{$data} only holds the requested page, so compare
-\verb{$data} row count with \verb{$meta$total} when it matters.
+You rarely need to touch its internals. A result behaves like its table for
+the things you do every day, and the accessors pull out one part when you want
+it:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{hits <- gpsadb_search_datasets(perturbed_gene = "TP53")
+
+hits                    # scalars on top, the page below
+nrow(hits)              # rows in this page
+hits[1:3, ]             # ordinary data-frame indexing
+hits[, c("id", "method")]
+head(hits)
+
+gpsadb_data(hits)       # the tibble itself (hand it to dplyr)
+gpsadb_meta(hits)       # the scalars as a list
+gpsadb_meta(hits, "total")
+gpsadb_report_url(hits) # the website report, when there is one
+}\if{html}{\out{</div>}}
+
+\verb{$data} and \verb{$meta} still work; the accessors exist so you do not have to
+remember them, and so \code{gpsadb_meta(x, field)} can tell you which fields are
+available when you guess wrong.
+
+Paging is explicit: the table only holds the requested page, so compare
+\code{nrow()} with \code{gpsadb_meta(x, "total")} when it matters.
 }

@@ -66,3 +66,61 @@ test_that("as.data.frame unwraps the data", {
   expect_s3_class(df, "data.frame")
   expect_equal(df$gene, c("A", "B"))
 })
+
+test_that("accessors pull out the parts of a result", {
+  res <- new_gpsadb_result(
+    tibble::tibble(gene = c("A", "B"), log2fc = c(1.5, -0.5)),
+    list(total = 2, url = "https://example.org/r/1")
+  )
+
+  expect_equal(gpsadb_data(res), tibble::tibble(gene = c("A", "B"), log2fc = c(1.5, -0.5)))
+  expect_type(gpsadb_meta(res), "list")
+  expect_equal(gpsadb_meta(res, "total"), 2)
+  expect_equal(gpsadb_report_url(res), "https://example.org/r/1")
+})
+
+test_that("a missing metadata field lists what is there", {
+  res <- new_gpsadb_result(tibble::tibble(gene = "A"), list(total = 1, returned = 1))
+  expect_error(gpsadb_meta(res, "nope"), "Available: total, returned")
+})
+
+test_that("gpsadb_report_url returns NA when there is no report", {
+  res <- new_gpsadb_result(tibble::tibble(gene = "A"), list(total = 1))
+  expect_true(is.na(gpsadb_report_url(res)))
+})
+
+test_that("accessors reject objects that are not results", {
+  expect_error(gpsadb_data(data.frame(a = 1)), "must be a `gpsadb_result`")
+  expect_error(gpsadb_meta(list(a = 1)), "must be a `gpsadb_result`")
+})
+
+test_that("indexing behaves like the underlying table", {
+  res <- new_gpsadb_result(
+    tibble::tibble(gene = c("A", "B", "C"), log2fc = c(1, 2, 3)),
+    list(total = 3)
+  )
+
+  expect_equal(nrow(res), 3L)
+  expect_equal(ncol(res), 2L)
+  expect_equal(dim(res), c(3L, 2L))
+  expect_equal(names(res), c("gene", "log2fc"))
+
+  expect_equal(res[1:2, ], tibble::tibble(gene = c("A", "B"), log2fc = c(1, 2)))
+  expect_equal(res[, "gene"], tibble::tibble(gene = c("A", "B", "C")))
+  expect_equal(res["log2fc"], tibble::tibble(log2fc = c(1, 2, 3)))
+  expect_s3_class(res[1, ], "tbl_df")
+
+  expect_equal(head(res, 1)$gene, "A")
+  expect_equal(tail(res, 1)$gene, "C")
+  expect_s3_class(as_tibble(res), "tbl_df")
+})
+
+test_that("gpsadb_result prints the scalars above the page", {
+  res <- new_gpsadb_result(
+    tibble::tibble(gene = "A"),
+    list(total = 71L, returned = 1L)
+  )
+  out <- capture.output(print(res))
+  expect_true(any(grepl("total: 71", out)))
+  expect_true(any(grepl("gene", out)))
+})

@@ -1,6 +1,6 @@
 Package: gpsadb
 Title: R Client for the 'GPSAdb' Genetic Perturbation Database
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: person("Yonghe", "Xia", , "xiayh17@gmail.com", role = c("aut", "cre"))
 Description: Query 'GPSAdb', a database of genetic perturbation RNA-seq
     datasets with precomputed differential expression and gene set enrichment,
@@ -13,7 +13,7 @@ Description: Query 'GPSAdb', a database of genetic perturbation RNA-seq
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Imports: aisdk.mcp, tibble
+Imports: aisdk.mcp, tibble, utils
 Suggests: aisdk, testthat (>= 3.0.0)
 Remotes: YuLab-SMU/aisdk.mcp
 Config/testthat/edition: 3

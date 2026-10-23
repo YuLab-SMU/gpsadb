@@ -21,9 +21,10 @@ gpsadb_biotrigger(
 \item{client}{An MCP client; defaults to \code{\link[=gpsadb_client]{gpsadb_client()}}.}
 }
 \value{
-A \code{gpsadb_result}; \verb{$data} has \code{rank}, \code{dataset}, \code{perturbed_gene},
-\code{method}, \code{cell_line}, \code{es}, \code{effect}, \code{n_genes_in_dataset}. \verb{$meta} holds
-\code{n_genes}, \code{n_matched}, \code{n_datasets} and the \code{url} of the web report.
+A \link{gpsadb_result}; its data has \code{rank}, \code{dataset}, \code{perturbed_gene},
+\code{method}, \code{cell_line}, \code{es}, \code{effect}, \code{n_genes_in_dataset}, and
+\code{gpsadb_meta()} holds \code{n_genes}, \code{n_matched}, \code{n_datasets} and the report
+URL (\code{\link[=gpsadb_report_url]{gpsadb_report_url()}}).
 }
 \description{
 Scores your gene set (GSEA enrichment score, ES) on the ranked gene list of

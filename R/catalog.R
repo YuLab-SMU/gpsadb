@@ -22,8 +22,8 @@
 #' @param limit Maximum datasets to return (1-200).
 #' @param offset Skip this many matches (paging).
 #' @param client An MCP client; defaults to [gpsadb_client()].
-#' @return A `gpsadb_result`; `$data` has one row per dataset, `$meta$total`
-#'   the number of matches overall.
+#' @return A [gpsadb_result]: `gpsadb_data()` has one row per dataset,
+#'   `gpsadb_meta(x, "total")` the number of matches overall.
 #' @examplesIf interactive()
 #' gpsadb_search_datasets(perturbed_gene = "TP53", limit = 5)
 #' gpsadb_search_datasets(method = "CRISPRi", cell_line = "HeLa", limit = 5)
@@ -60,18 +60,18 @@ gpsadb_search_datasets <- function(query = NULL,
 
 #' Metadata of one dataset
 #'
-#' `$data` holds the samples with their group (`control` / `treat`) and
-#' phenotype attributes; `$meta` holds the dataset-level fields: perturbed gene,
-#' method, cell line and tissue, data source and accession, download links, and
-#' the website URL.
+#' `gpsadb_data()` holds the samples with their group (`control` / `treat`) and
+#' phenotype attributes; `gpsadb_meta()` holds the dataset-level fields:
+#' perturbed gene, method, cell line and tissue, data source and accession,
+#' download links, and the website URL.
 #'
 #' @param dataset_id Dataset ID, e.g. `"D20305"`.
 #' @param client An MCP client; defaults to [gpsadb_client()].
 #' @return A `gpsadb_result`.
 #' @examplesIf interactive()
 #' ds <- gpsadb_dataset("D20305")
-#' ds$meta$title
-#' ds$data
+#' gpsadb_meta(ds, "title")
+#' gpsadb_data(ds)
 #' @export
 gpsadb_dataset <- function(dataset_id, client = gpsadb_client()) {
   check_dataset_id(dataset_id)
@@ -99,7 +99,7 @@ gpsadb_dataset <- function(dataset_id, client = gpsadb_client()) {
 #'   chosen direction, by absolute value for `"both"`).
 #' @param limit Maximum genes to return (1-500).
 #' @param client An MCP client; defaults to [gpsadb_client()].
-#' @return A `gpsadb_result`; `$data` has `gene`, `gene_id`, `log2fc`, `padj`,
+#' @return A [gpsadb_result]; its data has `gene`, `gene_id`, `log2fc`, `padj`,
 #'   `pvalue`, `base_mean`.
 #' @examplesIf interactive()
 #' gpsadb_de("D20305", direction = "down", limit = 10)
@@ -125,8 +125,8 @@ gpsadb_de <- function(dataset_id,
   )))
   new_gpsadb_result(
     records_to_tibble(res$genes),
-    res[c("dataset_id", "title", "n_genes_tested", "padj_lt",
-          "n_up", "n_down", "returned", "url")]
+    pick_meta(res, c("dataset_id", "title", "n_genes_tested", "padj_lt",
+          "n_up", "n_down", "returned", "url"))
   )
 }
 
@@ -148,8 +148,9 @@ gpsadb_de <- function(dataset_id,
 #' @param include_core_genes Add the leading-edge genes of each term as a list
 #'   column.
 #' @param client An MCP client; defaults to [gpsadb_client()].
-#' @return A `gpsadb_result`; `$data` has `term`, `nes`, `es`, `padj`, `pvalue`,
-#'   `set_size`, `leading_edge`, `n_core_genes` and (optionally) `core_genes`.
+#' @return A [gpsadb_result]; its data has `term`, `nes`, `es`, `padj`,
+#'   `pvalue`, `set_size`, `leading_edge`, `n_core_genes` and (optionally)
+#'   `core_genes`.
 #' @examplesIf interactive()
 #' gpsadb_gsea("D20305", limit = 10, include_core_genes = TRUE)
 #' @export
@@ -173,8 +174,8 @@ gpsadb_gsea <- function(dataset_id,
   )))
   new_gpsadb_result(
     records_to_tibble(res$terms),
-    res[c("dataset_id", "title", "library", "n_terms", "padj_lt",
-          "n_significant", "returned", "url")]
+    pick_meta(res, c("dataset_id", "title", "library", "n_terms", "padj_lt",
+          "n_significant", "returned", "url"))
   )
 }
 

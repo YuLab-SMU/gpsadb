@@ -32,7 +32,7 @@ dataset.}
 \item{client}{An MCP client; defaults to \code{\link[=gpsadb_client]{gpsadb_client()}}.}
 }
 \value{
-A \code{gpsadb_result}; \verb{$data} has \code{library}, \code{term}, \code{size}, \code{testable}
+A \link{gpsadb_result}; its data has \code{library}, \code{term}, \code{size}, \code{testable}
 and (optionally) \code{genes} as a list column.
 }
 \description{

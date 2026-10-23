@@ -37,8 +37,9 @@ column.}
 \item{client}{An MCP client; defaults to \code{\link[=gpsadb_client]{gpsadb_client()}}.}
 }
 \value{
-A \code{gpsadb_result}; \verb{$data} has \code{term}, \code{nes}, \code{es}, \code{padj}, \code{pvalue},
-\code{set_size}, \code{leading_edge}, \code{n_core_genes} and (optionally) \code{core_genes}.
+A \link{gpsadb_result}; its data has \code{term}, \code{nes}, \code{es}, \code{padj},
+\code{pvalue}, \code{set_size}, \code{leading_edge}, \code{n_core_genes} and (optionally)
+\code{core_genes}.
 }
 \description{
 GSEA computed by the database (clusterProfiler, genes ranked by log2 fold

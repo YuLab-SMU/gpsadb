@@ -1,5 +1,6 @@
 #' @keywords internal
 #' @importFrom tibble tibble as_tibble
+#' @importFrom utils head tail
 "_PACKAGE"
 
 # Package-level state: one cached MCP client per session.

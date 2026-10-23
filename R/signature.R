@@ -9,9 +9,10 @@
 #' @param effect `"activated"` (ES > 0), `"inhibited"` (ES < 0) or `"both"`.
 #' @param limit Maximum datasets to return (1-200).
 #' @param client An MCP client; defaults to [gpsadb_client()].
-#' @return A `gpsadb_result`; `$data` has `rank`, `dataset`, `perturbed_gene`,
-#'   `method`, `cell_line`, `es`, `effect`, `n_genes_in_dataset`. `$meta` holds
-#'   `n_genes`, `n_matched`, `n_datasets` and the `url` of the web report.
+#' @return A [gpsadb_result]; its data has `rank`, `dataset`, `perturbed_gene`,
+#'   `method`, `cell_line`, `es`, `effect`, `n_genes_in_dataset`, and
+#'   `gpsadb_meta()` holds `n_genes`, `n_matched`, `n_datasets` and the report
+#'   URL ([gpsadb_report_url()]).
 #' @examplesIf interactive()
 #' gpsadb_biotrigger(c("HIF1A", "VEGFA", "SLC2A1", "PDK1", "BNIP3"))
 #' @export
@@ -27,8 +28,8 @@ gpsadb_biotrigger <- function(genes,
   ))
   new_gpsadb_result(
     records_to_tibble(res$results),
-    res[c("hash", "release", "url", "n_genes", "n_matched", "n_datasets",
-          "returned")]
+    pick_meta(res, c("hash", "release", "url", "n_genes", "n_matched", "n_datasets",
+          "returned"))
   )
 }
 
@@ -54,9 +55,10 @@ gpsadb_biotrigger <- function(genes,
 #'   `"both"`.
 #' @param limit Maximum datasets to return (1-200).
 #' @param client An MCP client; defaults to [gpsadb_client()].
-#' @return A `gpsadb_result`; `$data` has `rank`, `dataset`, `perturbed_gene`,
-#'   `method`, `cell_line`, `gscore`, `up_es`, `down_es`, `effect`. `$meta` has
-#'   `source`, `n_up_genes`, `n_down_genes`, `n_datasets` and the report `url`.
+#' @return A [gpsadb_result]; its data has `rank`, `dataset`, `perturbed_gene`,
+#'   `method`, `cell_line`, `gscore`, `up_es`, `down_es`, `effect`, and
+#'   `gpsadb_meta()` has `source`, `n_up_genes`, `n_down_genes`, `n_datasets`
+#'   and the report URL ([gpsadb_report_url()]).
 #' @examplesIf interactive()
 #' gpsadb_fastgpsa(dataset_id = "D20305", limit = 10)
 #' gpsadb_fastgpsa(
@@ -132,7 +134,7 @@ gpsadb_fastgpsa <- function(up_genes = NULL,
   )))
   new_gpsadb_result(
     records_to_tibble(res$results),
-    res[c("hash", "release", "url", "source", "n_up_genes", "n_down_genes",
-          "n_datasets", "returned")]
+    pick_meta(res, c("hash", "release", "url", "source", "n_up_genes", "n_down_genes",
+          "n_datasets", "returned"))
   )
 }
