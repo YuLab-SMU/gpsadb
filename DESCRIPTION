@@ -1,0 +1,23 @@
+Package: gpsadb
+Title: R Client for the 'GPSAdb' Genetic Perturbation Database
+Version: 0.1.0
+Authors@R: person("Yonghe", "Xia", , "xiayh17@gmail.com", role = c("aut", "cre"))
+Description: Query 'GPSAdb', a database of genetic perturbation RNA-seq
+    datasets with precomputed differential expression and gene set enrichment,
+    and run its signature-matching tools from R. Data is retrieved over the
+    database's Model Context Protocol ('MCP') endpoint using the 'aisdk.mcp'
+    client, and results are returned as tibbles. Covers dataset search and
+    metadata, per-dataset differential expression and 'GSEA', reverse lookups
+    across every dataset, and signature search ('BioTrigger', 'fastGPSA').
+    Reference: Guo et al. (2026) <doi:10.1093/nar/gkaf1077>.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Imports: aisdk.mcp, tibble
+Suggests: aisdk, testthat (>= 3.0.0)
+Remotes: YuLab-SMU/aisdk.mcp
+Config/testthat/edition: 3
+URL: https://github.com/YuLab-SMU/gpsadb
+BugReports: https://github.com/YuLab-SMU/gpsadb/issues
+Depends: R (>= 4.1.0)
+Config/roxygen2/version: 8.1.1

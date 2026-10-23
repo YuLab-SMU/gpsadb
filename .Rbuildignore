@@ -1,0 +1,8 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^LICENSE\.md$
+^\.DS_Store$
+^cran-comments\.md$
+^gpsadb-mcp$
+^examples$
